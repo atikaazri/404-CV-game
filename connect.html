@@ -165,7 +165,7 @@
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
   <div id="topbar">
     <div id="logo-area">
-      <img id="logo-img" src="colLogo.svg" alt="Logo" onerror="this.style.display='none'">
+      <img id="logo-img" src="logo.png" alt="Logo" onerror="this.style.display='none'">
     </div>
     <div id="topbar-title">
       <div id="topbar-nf">NOT FOUND</div>
@@ -188,7 +188,7 @@
 <div id="cam-gate">
   <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
-  <img id="cg-logo" src="colLogo.svg" alt="Logo" onerror="this.style.display='none'">
+  <img id="cg-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
   <div id="cg-title">CAMERA REQUIRED</div>
   <div id="cg-sub">This experience uses your webcam<br>to track your index finger in real-time.<br>No data is stored or transmitted.</div>
   <button id="cg-btn" onclick="startCamera()">[ ENABLE CAMERA ]</button>
@@ -231,7 +231,8 @@ let fingerSmooth = { x:-9999, y:-9999 };
 let handOn       = false;
 
 let openHandFrames  = 0;
-const OPEN_THRESH   = 30;
+const OPEN_THRESH   = 8;    // ~0.13s to trigger (quick response)
+let openHandCooldown = 0;   // frames to wait before detecting again after reset
 
 // Merge animation state
 let merging       = false;
@@ -428,8 +429,8 @@ new p5(function(p) {
       }
     }
 
-    // ── Dwell detection (only when hand present) ──
-    if (handOn && selected.length < REQUIRED) {
+    // ── Dwell detection (only when hand present and past reset cooldown) ──
+    if (handOn && selected.length < REQUIRED && openHandCooldown === 0) {
       blobs.forEach((b, idx) => {
         if (b.selected) return;
         let d = b.position.dist(p.createVector(fingerSmooth.x, fingerSmooth.y));
@@ -518,17 +519,27 @@ new p5(function(p) {
       p.fill(b.color);
       p.circle(b.position.x, b.position.y, b.radius);
 
-      // "404" text inside every blob
+      // Text inside blob
       p.noStroke();
-      p.fill(b.selected ? 'rgba(10,15,13,0.7)' : 'rgba(0,255,136,0.35)');
       p.textAlign(p.CENTER, p.CENTER);
-      p.textSize(11);
-      p.textStyle(p.BOLD);
-      p.text('404', b.position.x, b.position.y - 6);
-      p.textSize(7);
-      p.textStyle(p.NORMAL);
-      p.text('NOT FOUND', b.position.x, b.position.y + 8);
-      p.textStyle(p.NORMAL);
+      if (b.selected) {
+        p.textFont('Orbitron');
+        p.textStyle(p.BOLD);
+        p.textSize(12);
+        p.fill(255, 255, 255, 220);
+        p.text('FOUND', b.position.x, b.position.y);
+        p.textStyle(p.NORMAL);
+        p.textFont('monospace');
+      } else {
+        p.fill('rgba(0,255,136,0.35)');
+        p.textSize(11);
+        p.textStyle(p.BOLD);
+        p.text('404', b.position.x, b.position.y - 6);
+        p.textSize(7);
+        p.textStyle(p.NORMAL);
+        p.text('NOT FOUND', b.position.x, b.position.y + 8);
+        p.textStyle(p.NORMAL);
+      }
     });
 
     // ── Circle target cursor ──
@@ -727,11 +738,19 @@ function onResults(res) {
     fingerRaw.y =       tip.y  * window.innerHeight;
     if (fingerSmooth.x < -100) { fingerSmooth.x = fingerRaw.x; fingerSmooth.y = fingerRaw.y; }
 
-    // Open hand → restart
-    if (handOpenness(lm) > 0.35) {
+    // Open hand → restart (with cooldown so it doesn't re-trigger immediately)
+    if (openHandCooldown > 0) {
+      openHandCooldown--;
+    } else if (handOpenness(lm) > 0.35) {
       openHandFrames++;
-      if (openHandFrames >= OPEN_THRESH && (foundMode || selected.length > 0)) { openHandFrames=0; resetGame(); }
-    } else { openHandFrames = 0; }
+      if (openHandFrames >= OPEN_THRESH && (foundMode || selected.length > 0)) {
+        openHandFrames = 0;
+        openHandCooldown = 480; // 2 second cooldown after reset
+        resetGame();
+      }
+    } else {
+      openHandFrames = 0;
+    }
 
   } else {
     handOn = false;
@@ -765,6 +784,8 @@ function resetGame() {
   selected        = [];
   dwellMap        = {};
   flashRings      = [];
+  openHandFrames   = 0;
+  openHandCooldown = 0;
   blobs.forEach(b => { b.selected=false; b.dwell=0; b.color='#0B3D2E'; b.decayTimer=0; });
   updateDots();
   document.getElementById('restart-hint').classList.remove('visible');
