@@ -55,36 +55,30 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:18px 28px; border-bottom:1px solid var(--border);
     background:rgba(11,61,46,0.10); backdrop-filter:blur(4px);
+    position:relative;
   }
+  #topbar-title {
+    position:absolute; left:50%; transform:translateX(-50%);
+    text-align:center; pointer-events:none; user-select:none;
+    transition:opacity 0.4s;
+  }
+  #topbar-title.hidden { opacity:0; pointer-events:none; }
+  #topbar-nf {
+    font-family:'Orbitron',monospace; font-size:clamp(13px,1.6vw,20px);
+    font-weight:900; letter-spacing:4px; color:var(--accent);
+    text-shadow:0 0 12px rgba(0,255,136,0.8),0 0 30px rgba(0,255,136,0.3);
+    animation:glitch 3.5s infinite; position:relative; white-space:nowrap;
+  }
+  #topbar-nf::before { content:'NOT FOUND'; position:absolute; inset:0; opacity:0; color:var(--lime); animation:glitch-g 3.5s infinite; clip-path:polygon(0 20%,100% 20%,100% 42%,0 42%); }
+  #topbar-nf::after  { content:'NOT FOUND'; position:absolute; inset:0; opacity:0; color:var(--accent); filter:brightness(3); animation:glitch-d 3.5s infinite; clip-path:polygon(0 58%,100% 58%,100% 76%,0 76%); }
   #logo-area { display:flex; align-items:center; gap:12px; }
   #logo-img {
     height:30px; width:auto;
     filter:brightness(0) saturate(100%) invert(82%) sepia(60%) saturate(400%) hue-rotate(100deg) brightness(1.1);
     opacity:0.9;
   }
-  #logo-divider { width:1px; height:20px; background:var(--border); }
-  #system-label { font-family:'Orbitron',monospace; font-size:8px; font-weight:700; letter-spacing:3px; color:var(--text-dim); line-height:1.8; }
   #scan-info { font-size:8px; color:var(--text-dim); letter-spacing:2px; text-align:right; line-height:2; }
   #scan-info span { color:var(--accent); }
-
-  /* MAIN TITLE */
-  #main-title {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    text-align:center; pointer-events:none; transition:opacity 0.5s; user-select:none;
-  }
-  #main-title.hidden { opacity:0; }
-
-  #err-code { font-family:'Orbitron',monospace; font-size:clamp(12px,1.8vw,20px); font-weight:400; letter-spacing:10px; color:var(--text-dim); margin-bottom:10px; }
-  #not-found {
-    font-family:'Orbitron',monospace; font-size:clamp(36px,6.5vw,88px);
-    font-weight:900; letter-spacing:6px; color:var(--accent);
-    text-shadow:0 0 18px rgba(0,255,136,0.9),0 0 55px rgba(0,255,136,0.45),0 0 110px rgba(0,255,136,0.2);
-    animation:glitch 3.5s infinite; position:relative; white-space:nowrap;
-  }
-  #not-found::before { content:'NOT FOUND'; position:absolute; inset:0; opacity:0; color:var(--lime); animation:glitch-g 3.5s infinite; clip-path:polygon(0 20%,100% 20%,100% 42%,0 42%); }
-  #not-found::after  { content:'NOT FOUND'; position:absolute; inset:0; opacity:0; color:var(--accent); filter:brightness(3); animation:glitch-d 3.5s infinite; clip-path:polygon(0 58%,100% 58%,100% 76%,0 76%); }
-  #subtitle   { font-size:9px; letter-spacing:6px; color:var(--text-dim); margin-top:16px; animation:blink 1.5s step-end infinite; }
-  #click-hint { font-size:8px; letter-spacing:3px; margin-top:14px; color:rgba(0,255,136,0.28); animation:blink 2.4s step-end infinite; }
 
   /* NODE DOTS */
   #node-counter { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; }
@@ -140,7 +134,7 @@
     content:'[ SPECIMEN IDENTIFIED ]'; position:absolute; top:8px; left:50%; transform:translateX(-50%);
     font-size:7px; letter-spacing:3px; color:rgba(0,255,136,0.65); z-index:2; white-space:nowrap;
   }
-  #unlocked-img { display:block; width:100%; filter:saturate(0.55) brightness(0.88) hue-rotate(80deg); }
+  #unlocked-img { display:block; width:100%; }
   #found-hint { font-size:9px; letter-spacing:4px; color:var(--text-dim); margin-top:26px; animation:blink 1.9s step-end infinite; pointer-events:all; cursor:pointer; }
   #found-hint:hover { color:var(--accent); }
   #found-sub { font-size:8px; letter-spacing:3px; color:var(--text-dim); margin-top:10px; opacity:0.5; }
@@ -171,17 +165,12 @@
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
   <div id="topbar">
     <div id="logo-area">
-      <img id="logo-img" src="logo.png" alt="Logo" onerror="this.style.display='none'">
-      <div id="logo-divider"></div>
-      <div id="system-label">CV SYS v4.2<br>HAND TRACK: ACTIVE</div>
+      <img id="logo-img" src="colLogo.svg" alt="Logo" onerror="this.style.display='none'">
     </div>
-    <div id="scan-info">BLOBS: <span id="obj-count">0</span> &nbsp;|&nbsp; HAND: <span id="hand-info">—</span></div>
-  </div>
-  <div id="main-title">
-    <div id="err-code">— 404 —</div>
-    <div id="not-found">NOT FOUND</div>
-    <div id="subtitle">▸ OBJECT NOT IDENTIFIED ◂</div>
-    <div id="click-hint">POINT FINGER · HOVER 3 BLOBS TO TRIANGULATE</div>
+    <div id="topbar-title">
+      <div id="topbar-nf">NOT FOUND</div>
+    </div>
+    <div id="scan-info">BLOBS: <span id="obj-count">0</span></div>
   </div>
   <div id="node-counter">
     <div class="node-dot" id="dot-0"></div>
@@ -192,14 +181,14 @@
   <div id="restart-hint">SPACE OR OPEN HAND TO RESTART</div>
   <div id="hand-status">
     <div id="hand-dot"></div>
-    <span id="hand-label">NO HAND</span>
+    <span id="hand-label">HAND TRACK: SEARCHING</span>
   </div>
 </div>
 
 <div id="cam-gate">
   <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
-  <img id="cg-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
+  <img id="cg-logo" src="colLogo.svg" alt="Logo" onerror="this.style.display='none'">
   <div id="cg-title">CAMERA REQUIRED</div>
   <div id="cg-sub">This experience uses your webcam<br>to track your index finger in real-time.<br>No data is stored or transmitted.</div>
   <button id="cg-btn" onclick="startCamera()">[ ENABLE CAMERA ]</button>
@@ -207,7 +196,7 @@
 
 <div id="found-overlay">
   <div id="found-title">FOUND !</div>
-  <div id="img-wrap"><img id="unlocked-img" src="unlocked.png" alt="Unlocked"/></div>
+  <div id="img-wrap"><img id="unlocked-img" src="unlocked.png" alt="QR Code"/></div>
   <div id="found-hint" onclick="resetGame()">[ CLICK TO SCAN AGAIN ]</div>
   <div id="found-sub">OR PRESS SPACE · OPEN YOUR HAND</div>
 </div>
@@ -216,7 +205,7 @@
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
-const BLOB_COUNT     = 10;
+const BLOB_COUNT     = 9;
 const BLOB_RADIUS    = 55;        // fixed radius for all blobs (like the grid example)
 const HANDLE_RATE    = 3;         // exact value from original grid code
 const FINGER_RADIUS  = 55;        // finger blob same size as blobs so skin feels natural
@@ -244,9 +233,19 @@ let handOn       = false;
 let openHandFrames  = 0;
 const OPEN_THRESH   = 30;
 
-// The finger is ONE special blob — only it connects to the floating blobs
-// Represented as a p5 object with .position and .radius to match the grid code exactly
-let fingerCircle = null;
+// Merge animation state
+let merging       = false;
+let mergeProgress = 0;
+let mergeTimerFired = false;
+let qrImage       = null;
+
+// Colors assigned to each locked blob in order (matches the image gradient)
+const SEL_COLORS  = ['#0B3D2E', '#00FF88', '#C6FF00'];
+
+let fingerCircle  = null;
+
+// Helper
+function clamp(min, val, max) { return Math.min(max, Math.max(min, val)); }
 
 // ═══════════════════════════════════════════════════════
 // P5 SKETCH
@@ -258,10 +257,13 @@ new p5(function(p) {
     cnv.parent('canvas-container');
     p.noStroke();
 
+    // Preload QR code image
+    qrImage = p.loadImage('unlocked.png');
+
     fingerCircle = {
       position: p.createVector(-9999, -9999),
       radius:   FINGER_RADIUS * 2,
-      color:    '#0B3D2E'   // same as blobs — finger invisible, skin seamless
+      color:    '#0B3D2E'
     };
 
     spawnBlobs(p);
@@ -273,10 +275,106 @@ new p5(function(p) {
   p.keyPressed = function() { if (p.key === ' ') resetGame(); };
 
   p.draw = function() {
-    if (foundMode) return;
-
-    // Solid void background
+    // Solid void background always
     p.background(10, 15, 13);
+
+    // ══════════════════════════════════════
+    // MERGE / FOUND ANIMATION (canvas only)
+    // ══════════════════════════════════════
+    if (merging) {
+      mergeProgress = Math.min(mergeProgress + 0.008, 1);
+
+      // Pull the 3 selected blobs toward screen center
+      let cx = p.width / 2, cy = p.height / 2;
+      let spacing = BLOB_RADIUS * 2 + 55; // horizontal spacing in final chain
+      let targets = [
+        p.createVector(cx - spacing, cy),
+        p.createVector(cx,           cy),
+        p.createVector(cx + spacing, cy)
+      ];
+
+      let selBlobs = blobs.filter(b => b.selected);
+      selBlobs.forEach((b, i) => {
+        let t = targets[i];
+        // Lerp position toward target
+        b.position.x += (t.x - b.position.x) * 0.045;
+        b.position.y += (t.y - b.position.y) * 0.045;
+        b.vel.mult(0.85); // damp velocity
+      });
+
+      // Draw skins between all selected (they connect as they close in)
+      function drawSkinMerge(cA, cB) {
+        let path = metaball(p, cA, cB, 0.5, HANDLE_RATE, MAX_DIST_SKIN);
+        if (!path) return;
+        let grad = p.drawingContext.createLinearGradient(
+          path.segments[0].x, path.segments[0].y,
+          path.segments[1].x, path.segments[1].y
+        );
+        grad.addColorStop(0, path.colors[0]);
+        grad.addColorStop(1, path.colors[1]);
+        p.drawingContext.fillStyle = grad;
+        p.beginShape();
+        for (let j = 0; j < 4; j++) {
+          if (j === 0) { p.vertex(path.segments[j].x, path.segments[j].y); }
+          else if (j % 2 !== 0) { p.vertex(path.segments[(j+1)%4].x, path.segments[(j+1)%4].y); }
+          if (j % 2 !== 0) continue;
+          p.bezierVertex(
+            path.segments[j].x       + path.handles[j].x,
+            path.segments[j].y       + path.handles[j].y,
+            path.segments[(j+1)%4].x + path.handles[(j+1)%4].x,
+            path.segments[(j+1)%4].y + path.handles[(j+1)%4].y,
+            path.segments[(j+1)%4].x, path.segments[(j+1)%4].y
+          );
+        }
+        p.endShape();
+        p.drawingContext.fillStyle = '#0B3D2E';
+      }
+
+      // Draw skins FIRST between adjacent blobs only (sorted by x) — prevents cross-pair overdraw
+      let sortedMerge = [...selBlobs].sort((a, b) => a.position.x - b.position.x);
+      for (let i = 0; i < sortedMerge.length - 1; i++)
+        drawSkinMerge(sortedMerge[i], sortedMerge[i + 1]);
+
+      p.noStroke();
+      selBlobs.forEach(b => {
+        p.fill(b.color);
+        p.circle(b.position.x, b.position.y, b.radius);
+      });
+
+      // Check if all blobs have reached their targets
+      let allArrived = selBlobs.every((b, i) => b.position.dist(targets[i]) < 10);
+
+      if (allArrived && !foundMode) {
+        let cx2 = p.width / 2, cy2 = p.height / 2;
+        p.noStroke();
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textFont('Orbitron');
+        p.textStyle(p.BOLD);
+        p.textSize(clamp(36, p.width * 0.045, 72));
+
+        // White glow — matches NOT FOUND topbar aesthetic
+        p.drawingContext.shadowColor = 'rgba(255,255,255,0.6)';
+        p.drawingContext.shadowBlur  = 24;
+        p.fill(255, 255, 255);
+        p.text('FOUND!', cx2, cy2);
+        p.drawingContext.shadowBlur = 0;
+        p.textStyle(p.NORMAL);
+        p.textFont('monospace');
+
+        // Trigger QR overlay after 2 seconds (only once)
+        if (!mergeTimerFired) {
+          mergeTimerFired = true;
+          setTimeout(() => {
+            foundMode = true;
+            document.getElementById('topbar-title').classList.add('hidden');
+            document.getElementById('found-overlay').classList.add('visible');
+          }, 2000);
+        }
+      }
+      return;
+    }
+
+    if (foundMode) return;
 
     // ── Smooth finger position ──
     fingerSmooth.x += (fingerRaw.x - fingerSmooth.x) * 0.16;
@@ -286,7 +384,6 @@ new p5(function(p) {
     // ── Move blobs ──
     blobs.forEach((b, bi) => {
       if (b.selected) {
-        // Selected: bounce inside viewport, never leave
         b.position.add(b.vel);
         if (b.position.x - BLOB_RADIUS < 0)        { b.position.x = BLOB_RADIUS;           b.vel.x =  Math.abs(b.vel.x); }
         if (b.position.x + BLOB_RADIUS > p.width)  { b.position.x = p.width - BLOB_RADIUS; b.vel.x = -Math.abs(b.vel.x); }
@@ -314,9 +411,8 @@ new p5(function(p) {
     });
 
     // ── Slow attraction between selected blobs ──
-    // Each selected blob drifts gently toward every other selected blob
-    const ATTRACT_FORCE = 0.008; // very gentle pull
-    const MIN_MERGE_DIST = BLOB_RADIUS * 2 + 50; // stop just before touching
+    const ATTRACT_FORCE  = 0.008;
+    const MIN_MERGE_DIST = BLOB_RADIUS * 2 + 50;
     let selBlobs = blobs.filter(b => b.selected);
     for (let i = 0; i < selBlobs.length; i++) {
       for (let j = i + 1; j < selBlobs.length; j++) {
@@ -326,7 +422,6 @@ new p5(function(p) {
           let attract = p5.Vector.sub(b.position, a.position).normalize().mult(ATTRACT_FORCE);
           a.vel.add(attract);
           b.vel.sub(attract);
-          // Dampen velocity so they don't overshoot
           a.vel.mult(0.97);
           b.vel.mult(0.97);
         }
@@ -339,54 +434,26 @@ new p5(function(p) {
         if (b.selected) return;
         let d = b.position.dist(p.createVector(fingerSmooth.x, fingerSmooth.y));
         if (d < HOVER_R + BLOB_RADIUS) {
+          // Finger is hovering — increment dwell
+          b.decayTimer = 0; // reset any decay countdown
           dwellMap[idx] = (dwellMap[idx] || 0) + 1;
           b.dwell = Math.min(dwellMap[idx] / DWELL_FRAMES, 1);
           if (dwellMap[idx] >= DWELL_FRAMES) lockBlob(idx, b);
         } else {
-          dwellMap[idx] = Math.max(0, (dwellMap[idx] || 0) - 1);
-          b.dwell = (dwellMap[idx] || 0) / DWELL_FRAMES;
+          // Finger left — decay over ~60 frames (1 second), then snap to 0
+          b.decayTimer = (b.decayTimer || 0) + 1;
+          const DECAY_FRAMES = 60;
+          if (b.decayTimer >= DECAY_FRAMES) {
+            dwellMap[idx] = 0;
+            b.dwell = 0;
+          }
+          // Visual dwell stays frozen while decaying — shows it's about to reset
         }
       });
     }
 
     // ═══════════════════════════════════════════════════
-    // DRAW BLOBS — fully opaque, no alpha
-    // Each blob drawn first, then skins on top
-    // ═══════════════════════════════════════════════════
-    blobs.forEach(b => {
-      // Dwell loading arc — animates around the blob edge as user hovers
-      let prog = b.dwell || 0;
-      if (prog > 0.01 && !b.selected) {
-        let arcR = BLOB_RADIUS + 10;
-        // Faint track ring
-        p.noFill();
-        p.stroke(0, 255, 136, 18); p.strokeWeight(2.5);
-        p.ellipse(b.position.x, b.position.y, arcR * 2);
-        // Bright progress arc — starts top, sweeps clockwise
-        p.stroke(0, 255, 136, 80 + prog * 175); p.strokeWeight(2.5);
-        p.arc(b.position.x, b.position.y, arcR * 2, arcR * 2,
-          -p.HALF_PI,
-          -p.HALF_PI + prog * p.TWO_PI);
-        p.noStroke();
-      }
-      if (b.selected) {
-        p.noFill();
-        p.stroke(0, 255, 136, 25); p.strokeWeight(2.5);
-        p.ellipse(b.position.x, b.position.y, BLOB_RADIUS * 2 + 28);
-        p.stroke(0, 255, 136, 12);
-        p.ellipse(b.position.x, b.position.y, BLOB_RADIUS * 2 + 48);
-        p.noStroke();
-      }
-
-      // Solid fill
-      p.noStroke();
-      p.fill(b.color);
-      p.circle(b.position.x, b.position.y, b.radius); // radius field = diameter (grid convention)
-    });
-
-    // ═══════════════════════════════════════════════════
-    // DRAW GOOEY SKINS — only between selected blobs
-    // Finger has no skin connection at all.
+    // DRAW GOOEY SKINS FIRST — so blobs render on top
     // ═══════════════════════════════════════════════════
     function drawSkin(circleA, circleB) {
       let path = metaball(p, circleA, circleB, 0.5, HANDLE_RATE, MAX_DIST_SKIN);
@@ -400,50 +467,84 @@ new p5(function(p) {
       p.drawingContext.fillStyle = grad;
       p.beginShape();
       for (let j = 0; j < 4; j++) {
-        if (j === 0) {
-          p.vertex(path.segments[j].x, path.segments[j].y);
-        } else if (j % 2 !== 0) {
-          p.vertex(path.segments[(j + 1) % 4].x, path.segments[(j + 1) % 4].y);
-        }
+        if (j === 0) { p.vertex(path.segments[j].x, path.segments[j].y); }
+        else if (j % 2 !== 0) { p.vertex(path.segments[(j+1)%4].x, path.segments[(j+1)%4].y); }
         if (j % 2 !== 0) continue;
         p.bezierVertex(
           path.segments[j].x       + path.handles[j].x,
           path.segments[j].y       + path.handles[j].y,
           path.segments[(j+1)%4].x + path.handles[(j+1)%4].x,
           path.segments[(j+1)%4].y + path.handles[(j+1)%4].y,
-          path.segments[(j+1)%4].x,
-          path.segments[(j+1)%4].y
+          path.segments[(j+1)%4].x, path.segments[(j+1)%4].y
         );
       }
       p.endShape();
       p.drawingContext.fillStyle = '#0B3D2E';
     }
 
-    // Selected blob ↔ selected blob — gooey skin (selBlobs already built above)
-    for (let i = 0; i < selBlobs.length; i++) {
-      for (let j = i + 1; j < selBlobs.length; j++) {
-        drawSkin(selBlobs[i], selBlobs[j]);
-      }
-    }
+    // Draw skins only between adjacent selected blobs (sorted by x position)
+    // This prevents the 0↔2 skin from crossing over the middle blob
+    let sortedSel = [...selBlobs].sort((a, b) => a.position.x - b.position.x);
+    for (let i = 0; i < sortedSel.length - 1; i++)
+      drawSkin(sortedSel[i], sortedSel[i + 1]);
 
-    // ── Circle target cursor — two rings + tick marks, no fill ──
+    // ═══════════════════════════════════════════════════
+    // DRAW BLOBS ON TOP OF SKINS
+    // ═══════════════════════════════════════════════════
+    blobs.forEach(b => {
+      // Dwell loading arc
+      let prog = b.dwell || 0;
+      if (prog > 0.01 && !b.selected) {
+        let arcR = BLOB_RADIUS + 10;
+        p.noFill();
+        p.stroke(0, 255, 136, 18); p.strokeWeight(2.5);
+        p.ellipse(b.position.x, b.position.y, arcR * 2);
+        p.stroke(0, 255, 136, 80 + prog * 175); p.strokeWeight(2.5);
+        p.arc(b.position.x, b.position.y, arcR * 2, arcR * 2,
+          -p.HALF_PI, -p.HALF_PI + prog * p.TWO_PI);
+        p.noStroke();
+      }
+      if (b.selected) {
+        p.noFill();
+        p.stroke(0, 255, 136, 25); p.strokeWeight(2.5);
+        p.ellipse(b.position.x, b.position.y, BLOB_RADIUS * 2 + 28);
+        p.stroke(0, 255, 136, 12);
+        p.ellipse(b.position.x, b.position.y, BLOB_RADIUS * 2 + 48);
+        p.noStroke();
+      }
+
+      // Solid blob fill
+      p.noStroke();
+      p.fill(b.color);
+      p.circle(b.position.x, b.position.y, b.radius);
+
+      // "404" text inside every blob
+      p.noStroke();
+      p.fill(b.selected ? 'rgba(10,15,13,0.7)' : 'rgba(0,255,136,0.35)');
+      p.textAlign(p.CENTER, p.CENTER);
+      p.textSize(11);
+      p.textStyle(p.BOLD);
+      p.text('404', b.position.x, b.position.y - 6);
+      p.textSize(7);
+      p.textStyle(p.NORMAL);
+      p.text('NOT FOUND', b.position.x, b.position.y + 8);
+      p.textStyle(p.NORMAL);
+    });
+
+    // ── Circle target cursor ──
     if (handOn && fingerSmooth.x > 0) {
       let fx = fingerSmooth.x, fy = fingerSmooth.y;
       let r1 = 18, r2 = 30, tick = 8;
       p.noFill();
-      // Outer ring
       p.stroke(198, 255, 0, 200); p.strokeWeight(1.5);
       p.ellipse(fx, fy, r2 * 2);
-      // Inner ring
       p.stroke(198, 255, 0, 150); p.strokeWeight(1);
       p.ellipse(fx, fy, r1 * 2);
-      // Four tick lines (gaps at circle edges — classic target reticle)
       p.stroke(198, 255, 0, 220); p.strokeWeight(1.5);
       p.line(fx, fy - r2 - tick, fx, fy - r2 - 1);
       p.line(fx, fy + r2 + 1,    fx, fy + r2 + tick);
       p.line(fx - r2 - tick, fy, fx - r2 - 1, fy);
       p.line(fx + r2 + 1,    fy, fx + r2 + tick, fy);
-      // Centre dot
       p.stroke(198, 255, 0, 255); p.strokeWeight(3);
       p.point(fx, fy);
       p.noStroke();
@@ -575,13 +676,17 @@ function lockBlob(idx, b) {
   if (b.selected || selected.length >= REQUIRED) return;
   b.selected = true;
   b.dwell    = 1;
-  b.color    = '#00FF88'; // accent when selected
+  // Assign gradient color based on selection order: deep → accent → lime
+  b.color    = SEL_COLORS[selected.length];
   selected.push(idx);
   dwellMap[idx] = 0;
   updateDots();
   flashRings.push({ x: b.position.x, y: b.position.y, age:0, life:42 });
   document.getElementById('restart-hint').classList.add('visible');
-  if (selected.length === REQUIRED) setTimeout(triggerFound, 800);
+  if (selected.length === REQUIRED) {
+    // Start merge animation — blobs glide to center and form the chain shape
+    setTimeout(() => { merging = true; mergeProgress = 0; }, 300);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -614,8 +719,7 @@ function onResults(res) {
   if (res.multiHandLandmarks && res.multiHandLandmarks.length > 0) {
     handOn = true;
     document.getElementById('hand-dot').classList.add('on');
-    document.getElementById('hand-label').textContent = 'LOCKED';
-    document.getElementById('hand-info').textContent  = 'DETECTED';
+    document.getElementById('hand-label').textContent = 'HAND TRACK: ACTIVE';
 
     let lm  = res.multiHandLandmarks[0];
     let tip = lm[8]; // index finger tip, mirrored
@@ -634,8 +738,7 @@ function onResults(res) {
     fingerRaw.x = -9999;
     openHandFrames = 0;
     document.getElementById('hand-dot').classList.remove('on');
-    document.getElementById('hand-label').textContent = 'NO HAND';
-    document.getElementById('hand-info').textContent  = 'SEARCHING...';
+    document.getElementById('hand-label').textContent = 'HAND TRACK: SEARCHING';
   }
 }
 
@@ -650,19 +753,22 @@ function updateDots() {
 
 function triggerFound() {
   foundMode = true;
-  document.getElementById('main-title').classList.add('hidden');
+  document.getElementById('topbar-title').classList.add('hidden');
   document.getElementById('found-overlay').classList.add('visible');
 }
 
 function resetGame() {
-  foundMode  = false;
-  selected   = [];
-  dwellMap   = {};
-  flashRings = [];
-  blobs.forEach(b => { b.selected=false; b.dwell=0; b.color='#0B3D2E'; });
+  foundMode       = false;
+  merging         = false;
+  mergeProgress   = 0;
+  mergeTimerFired = false;
+  selected        = [];
+  dwellMap        = {};
+  flashRings      = [];
+  blobs.forEach(b => { b.selected=false; b.dwell=0; b.color='#0B3D2E'; b.decayTimer=0; });
   updateDots();
   document.getElementById('restart-hint').classList.remove('visible');
-  document.getElementById('main-title').classList.remove('hidden');
+  document.getElementById('topbar-title').classList.remove('hidden');
   document.getElementById('found-overlay').classList.remove('visible');
 }
 
