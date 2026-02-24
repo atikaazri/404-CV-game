@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -107,10 +107,10 @@
 
   /* ── FIX 1: FOUND text as HTML at z-index 300, always above topbar (z-90) ── */
   #found-text {
-    position:fixed; top:5%; left:50%; transform:translate(-50%,-50%);
+    position:fixed; top:22%; left:50%; transform:translate(-50%,-50%);
     z-index:300; pointer-events:none;
     font-family:'Orbitron',monospace; font-weight:900;
-    font-size:clamp(30px,4vw,62px); letter-spacing:6px; color:#fff;
+    font-size:clamp(28px,4vw,62px); letter-spacing:6px; color:#fff;
     text-shadow:0 0 20px rgba(0,255,136,0.9),0 0 55px rgba(0,255,136,0.5);
     opacity:0; transition:opacity 0.6s; white-space:nowrap;
   }
@@ -214,7 +214,7 @@ const HANDLE_RATE    = 3;
 const FINGER_RADIUS  = 80;
 const MAX_DIST_SKIN  = 99999;
 const HOVER_R        = 65;
-const DWELL_FRAMES   = 40;
+const DWELL_FRAMES   = 42;
 const REQUIRED       = 3;
 
 let blobs        = [];
@@ -234,11 +234,12 @@ let openHandCooldown = 0;
 let merging         = false;
 let mergeProgress   = 0;
 let mergeTimerFired = false;
-let growScale       = 0.25;
+let growScale       = 1;
 let hasArrived      = false;
 let qrImage         = null;
 
 const SEL_COLORS  = ['#0B3D2E', '#00FF88', '#C6FF00'];
+const FOUND_TIMEOUT_SEC = 30; // ← change this to set how long the barcode shows before auto-reset
 let fingerCircle  = null;
 
 function clamp(min, val, max) { return Math.min(max, Math.max(min, val)); }
@@ -266,7 +267,7 @@ new p5(function(p) {
 
       let cx = p.width / 2, cy = p.height / 2;
       let drawR   = BLOB_RADIUS * growScale;
-      let spacing = drawR * 2 + 45 * growScale;
+      let spacing = drawR * 2 + 55 * growScale;
 
       let targets = [
         p.createVector(cx - spacing, cy),
@@ -285,7 +286,7 @@ new p5(function(p) {
         b.vel.mult(0.85);
       });
 
-      if (hasArrived) growScale = Math.min(growScale + 0.012, 2);
+      if (hasArrived) growScale = Math.min(growScale + 0.012, 2.4);
 
       selBlobs.forEach(b => { b._origR = b.radius; b.radius = drawR * 2; });
 
@@ -357,6 +358,7 @@ new p5(function(p) {
           mergeTimerFired = true;
           foundMode = true;
           document.getElementById('topbar-title').classList.add('hidden');
+          setTimeout(() => resetGame(), FOUND_TIMEOUT_SEC * 1000);
         }
       }
       return;
@@ -632,7 +634,7 @@ function onResults(res) {
     } else if (handOpenness(lm) > 0.35) {
       openHandFrames++;
       if (openHandFrames >= OPEN_THRESH && (foundMode || selected.length > 0)) {
-        openHandFrames=0; openHandCooldown=90; resetGame();
+        openHandFrames=0; openHandCooldown=120; resetGame();
       }
     } else { openHandFrames=0; }
   } else {
