@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -156,6 +156,34 @@
     to{text-shadow:0 0 50px rgba(0,255,136,1),0 0 130px rgba(0,255,136,.85),0 0 200px rgba(0,255,136,.4);}
   }
   @keyframes pd { from{opacity:.5;} to{opacity:1;} }
+
+  /* ── INTRO SCREEN ── */
+  #intro-screen {
+    position:fixed; inset:0; z-index:250;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px;
+    background:var(--void);
+    opacity:1; transition:opacity 0.7s;
+    pointer-events:none;
+  }
+  #intro-screen.hidden { opacity:0; pointer-events:none; }
+  #intro-title {
+    font-family:'Orbitron',monospace; font-weight:900;
+    font-size:clamp(22px,3.5vw,52px); letter-spacing:3px;
+    color:var(--accent);
+    text-shadow:0 0 18px rgba(0,255,136,0.8),0 0 40px rgba(0,255,136,0.35);
+    text-align:center; direction:rtl; line-height:1.5;
+    animation:glitch 3.5s infinite;
+  }
+  #intro-sub {
+    font-family:'Orbitron',monospace; font-weight:400;
+    font-size:clamp(11px,1.4vw,20px); letter-spacing:2px;
+    color:var(--text-dim); text-align:center; direction:rtl; line-height:1.8;
+    max-width:600px;
+  }
+  #intro-hand-hint {
+    font-size:9px; letter-spacing:3px; color:var(--text-dim);
+    animation:blink 1.6s step-end infinite; margin-top:8px;
+  }
 </style>
 </head>
 <body>
@@ -165,6 +193,13 @@
 
 <!-- FIX 1: FOUND text sits outside #ui, at z-index 300 — above topbar -->
 <div id="found-text">FOUND!</div>
+
+<!-- INTRO SCREEN -->
+<div id="intro-screen" class="hidden">
+  <div id="intro-title">وصل 3 نقاط عشان تدخل السحب معنا!</div>
+  <div id="intro-sub">افتح يدك عشان تبدأ اللعبة، بإصبع السبابة وصل ثلاث نقاط</div>
+  <div id="intro-hand-hint">[ افتح يدك للبدء ]</div>
+</div>
 
 <div id="ui">
   <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
@@ -239,8 +274,12 @@ let hasArrived      = false;
 let qrImage         = null;
 
 const SEL_COLORS  = ['#0B3D2E', '#00FF88', '#C6FF00'];
-const FOUND_TIMEOUT_SEC = 30; // ← change this to set how long the barcode shows before auto-reset
+const FOUND_TIMEOUT_SEC   = 30;  // seconds before auto-reset after barcode shows
+const INTRO_REDETECT_DELAY = 120; // frames (2s) before intro detects hands after reset
 let fingerCircle  = null;
+
+let introMode        = true;   // starts in intro — open hand dismisses it
+let introCooldown    = 0;      // frames before intro will detect hands after reset
 
 function clamp(min, val, max) { return Math.min(max, Math.max(min, val)); }
 
@@ -261,6 +300,7 @@ new p5(function(p) {
 
   p.draw = function() {
     p.background(10, 15, 13);
+    if (introMode) return; // canvas idle during intro
 
     if (merging) {
       mergeProgress = Math.min(mergeProgress + 0.008, 1);
@@ -606,6 +646,9 @@ const video = document.getElementById('cam-feed');
 
 async function startCamera() {
   document.getElementById('cam-gate').classList.add('hidden');
+  // Show intro now that camera is enabled
+  introCooldown = 60; // short pause before detecting hands on first launch
+  document.getElementById('intro-screen').classList.remove('hidden');
   mpHands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
   mpHands.setOptions({ maxNumHands:1, modelComplexity:1, minDetectionConfidence:0.72, minTrackingConfidence:0.65 });
   mpHands.onResults(onResults);
@@ -629,6 +672,18 @@ function onResults(res) {
     fingerRaw.x = (1-tip.x)*window.innerWidth;
     fingerRaw.y =    tip.y *window.innerHeight;
     if (fingerSmooth.x < -100) { fingerSmooth.x=fingerRaw.x; fingerSmooth.y=fingerRaw.y; }
+
+    // ── Intro mode: wait for open hand to start game ──
+    if (introMode) {
+      if (introCooldown > 0) { introCooldown--; return; }
+      if (handOpenness(lm) > 0.35) {
+        openHandFrames++;
+        if (openHandFrames >= OPEN_THRESH) { openHandFrames=0; dismissIntro(); }
+      } else { openHandFrames=0; }
+      return;
+    }
+
+    // ── Game mode: open hand resets ──
     if (openHandCooldown > 0) {
       openHandCooldown--;
     } else if (handOpenness(lm) > 0.35) {
@@ -650,17 +705,27 @@ function updateDots() {
   document.getElementById('node-label').textContent = selected.length+' / '+REQUIRED+' NODES LOCKED';
 }
 
+function dismissIntro() {
+  introMode = false;
+  document.getElementById('intro-screen').classList.add('hidden');
+  openHandCooldown = 60; // short cooldown so the open hand that dismissed intro doesn't immediately trigger game reset
+}
+
 function resetGame() {
   foundMode=false; merging=false; mergeProgress=0;
   mergeTimerFired=false; growScale=1; hasArrived=false;
   selected=[]; dwellMap={}; flashRings=[];
-  openHandFrames=0; openHandCooldown=120;
+  openHandFrames=0; openHandCooldown=0;
   blobs.forEach(b => { b.selected=false; b.dwell=0; b.color='#0B3D2E'; b.decayTimer=0; });
   updateDots();
   document.getElementById('restart-hint').classList.remove('visible');
   document.getElementById('topbar-title').classList.remove('hidden');
   document.getElementById('found-overlay').classList.remove('visible');
   document.getElementById('found-text').classList.remove('visible');
+  // Return to intro after reset — with 2s cooldown before detecting hands
+  introMode = true;
+  introCooldown = INTRO_REDETECT_DELAY;
+  document.getElementById('intro-screen').classList.remove('hidden');
 }
 
 document.addEventListener('keydown', e => { if (e.code==='Space'){e.preventDefault();resetGame();} });
